@@ -1,4 +1,5 @@
-urllib3>=1.22
-Flask>=0.12.1
-requests>=2.18.4
-impacket>=0.9.17
+Flask==2.2.3
+impacket==0.10.0
+requests==2.18.4
+urllib3==1.22
+dsinternals==1.2.4
