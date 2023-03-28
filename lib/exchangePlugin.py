@@ -5,7 +5,7 @@ import logging
 import time
 import base64
 
-# The HTTPS plugin used in a relayed connection 
+# The HTTPS plugin used in a relayed connection
 class ExchangePlugin(HTTPAttack):
 	def __init__(self, config, client, username):
 		self.config = config
@@ -45,7 +45,7 @@ class ExchangePlugin(HTTPAttack):
 					reading = self.client.getresponse()
 					reading.read()
 				self.config.PoppedDB_Lock.release()
-		except Exception, e:
+		except Exception as e:
 			try:
 				self.config.PoppedDB_Lock.release()
 			except:
@@ -65,6 +65,6 @@ class ExchangePlugin(HTTPAttack):
 							pass
 				if(self.config.PoppedDB_Lock.locked()):
 					self.config.PoppedDB_Lock.release()
-			except Exception, e:
+			except Exception as e:
 				exit(0)
 			# This exits the 'run' function, killing the thread
