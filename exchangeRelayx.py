@@ -17,10 +17,22 @@ from lib import ExchangePlugin, OWAServer
 logger.init()
 logging.getLogger().setLevel(logging.INFO)
 
-VERSION = "1.0.0" 	# Alpha release, bugs will ensue
+VERSION = "1.0.1" 	# Alpha release, bugs will ensue
 
 def banner():
-	print '''ExchangeRelayX\nVersion: '''+str(VERSION)+'''\n'''
+	print("""\
+
+ ____           _                            _____      _            __   __
+|___ \         | |                          |  __ \    | |           \ \ / /
+  __) |_  _____| |__   __ _ _ __   __ _  ___| |__) |___| | __ _ _   _ \ V /
+ |__ <\ \/ / __| '_ \ / _` | '_ \ / _` |/ _ \  _  // _ \ |/ _` | | | | > <
+ ___) |>  < (__| | | | (_| | | | | (_| |  __/ | \ \  __/ | (_| | |_| |/ . \\
+|____//_/\_\___|_| |_|\__,_|_| |_|\__, |\___|_|  \_\___|_|\__,_|\__, /_/ \_\\
+                                   __/ |                         __/ |
+                                  |___/                         |___/
+	""")
+
+	print ('''ExchangeRelayX\nVersion: '''+str(VERSION)+'''\n''')
 
 def parseCommandLine():
 	# Assign description to the help doc
@@ -47,7 +59,7 @@ def checkNTLM(url):
 		else:
 			logging.info("FAILURE - Server does not support NTLM authentication")
 			return False
-	except Exception, e:
+	except Exception as e:
 		logging.error("[checkNTLM] " + str(e))
 
 def startServers(targetURL, hashOutputFile = None, serverIP = "127.0.0.1", serverPort = 8000):
@@ -82,7 +94,7 @@ def startServers(targetURL, hashOutputFile = None, serverIP = "127.0.0.1", serve
 	try:
 		while owa.isAlive():
 			pass
-	except KeyboardInterrupt, e:
+	except KeyboardInterrupt as e:
 		logging.info("Shutting down...")
 		for thread in serverThreads:
 			thread.server.shutdown()
@@ -103,10 +115,3 @@ if __name__ == "__main__":
 
 	startServers(targetURL, outputFile, serverIP, serverPort)
 	pass
-
-
-
-
-
-
-
