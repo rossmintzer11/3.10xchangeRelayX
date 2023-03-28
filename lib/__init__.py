@@ -1,3 +1,3 @@
-import owaServer as OWAServer
-from exchangePlugin import ExchangePlugin
-import EWSOps
+from . import owaServer as OWAServer
+from .exchangePlugin import ExchangePlugin
+from . import EWSOps
