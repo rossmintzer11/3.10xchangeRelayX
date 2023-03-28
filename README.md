@@ -1,3 +1,6 @@
+## Fork
+Forked from: [Quickbreach - Repo](https://github.com/quickbreach/ExchangeRelayX) tweaked to work with Python3. 
+
 # ExchangeRelayX
 Version 1.0.0. This tool is a PoC to demonstrate the ability of an attacker to perform an SMB or HTTP based NTLM relay attack to the EWS endpoint on an on-premise Microsoft Exchange server to compromise the mailbox of the victim. This tool provides the attacker with an OWA looking interface, with access to the user's mailbox and contacts.
 
