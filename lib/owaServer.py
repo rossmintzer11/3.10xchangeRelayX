@@ -1,6 +1,6 @@
 #!/usr/bin/python
 from flask import Flask, request, abort, jsonify
-import EWSOps
+from . import EWSOps
 import logging
 import json
 import base64
@@ -41,7 +41,7 @@ def authRequests_POST(username, data = None):
 				uniStrip = ''.join([i if ord(i) < 128 else '' for i in decoded])
 				return uniStrip
 			# logging.info("Awaiting response from server...(" + str(poppedDB.keys()))
-	except Exception, e:
+	except Exception as e:
 		if(username in poppedDB.keys()):
 			poppedDB_Lock.acquire()
 			del(poppedDB[username])
@@ -59,7 +59,7 @@ def listSubFoldersInCustom(folderId, changeKey, username):
 		try:
 			data 			= authRequests_POST(data = EWSOps.findSubFoldersOfCustom(folderId, changeKey, 250, int(offset), 'Beginning'), username = username)
 			data 			= xml.dom.minidom.parseString(data)
-		except Exception, e:
+		except Exception as e:
 			logging.error("[owaServer::listSubFoldersInCustom] " + str(e))
 			raise EWSXMLException
 		for folder in data.getElementsByTagName('t:Folder'):
@@ -95,7 +95,7 @@ def listSubFoldersInDistinguished(distinguishedId, username):
 		try:
 			data 			= authRequests_POST(data = EWSOps.findSubFoldersOfDistinguished(distinguishedId, 250, int(offset), 'Beginning'), username = username)
 			data 			= xml.dom.minidom.parseString(data)
-		except Exception, e:
+		except Exception as e:
 			logging.error("[owaServer::listSubFoldersInDistinguished] " + str(e))
 			logging.error(data)
 			raise EWSXMLException
@@ -116,7 +116,7 @@ def listSubFoldersInDistinguished(distinguishedId, username):
 
 	return subFolders
 
-# 
+#
 def runServer(serverIP, serverPort, poppedDB, poppedDB_Lock):
 	app = Flask(__name__, static_folder='static')
 
@@ -155,7 +155,7 @@ def runServer(serverIP, serverPort, poppedDB, poppedDB_Lock):
 	def composeEmail(username):
 		username = username.replace("%", "/")
 		return open('lib/static/ComposeEmail.html').read()
-	
+
 	# Load the OWA page
 	@app.route('/EWStoOWA/<username>/', methods = ["GET"])
 	def loadOWA(username):
@@ -176,7 +176,7 @@ def runServer(serverIP, serverPort, poppedDB, poppedDB_Lock):
 			return jsonify(treeMap), 200
 		except EWSXMLException:
 			return jsonify({}), 500
-	
+
 	# List the emails in a distinguished folder
 	@app.route('/EWStoOWA/<username>/listEmails_Distinguished', methods = ['POST'])
 	def listEmailsDistinguished(username):
@@ -194,7 +194,7 @@ def runServer(serverIP, serverPort, poppedDB, poppedDB_Lock):
 		try:
 			data = authRequests_POST(data = EWSOps.findItemsDistinguishedId(folder, int(max_items), int(offset), startpoint), username = username)
 			data = xml.dom.minidom.parseString(data)
-		except Exception, e:
+		except Exception as e:
 			logging.error(e)
 			return jsonify({}), 500
 
@@ -242,7 +242,7 @@ def runServer(serverIP, serverPort, poppedDB, poppedDB_Lock):
 		try:
 			data = authRequests_POST(data = EWSOps.findItemsFolderId(folderId, changeKey, int(max_items), int(offset), startpoint), username = username)
 			data = xml.dom.minidom.parseString(data)
-		except Exception, e:
+		except Exception as e:
 			logging.error(e)
 			return jsonify({}), 500
 
@@ -283,12 +283,12 @@ def runServer(serverIP, serverPort, poppedDB, poppedDB_Lock):
 		data = authRequests_POST(data = EWSOps.getItems(itemMap), username = username)
 		try:
 			data = xml.dom.minidom.parseString(data)
-		except Exception, e:
+		except Exception as e:
 			logging.info("ERROR: " + str(data) + "\n" + str(e))
 			return jsonify({}), 500
 
 		response 	= {}
-		response['recipients'] = []	
+		response['recipients'] = []
 		if(len(data.getElementsByTagName('t:Message')[0].getElementsByTagName('t:ToRecipients')) > 0):
 			for item in data.getElementsByTagName('t:Message')[0].getElementsByTagName('t:ToRecipients')[0].getElementsByTagName('t:Mailbox'):
 				name 	= ""
@@ -312,7 +312,7 @@ def runServer(serverIP, serverPort, poppedDB, poppedDB_Lock):
 				name 	+= item.getElementsByTagName('t:Name')[0].firstChild.nodeValue
 				name 	+= " &lt;" + item.getElementsByTagName('t:EmailAddress')[0].firstChild.nodeValue + "&gt;"
 				response['senders'].append(name)
-		
+
 		response['date'] = "DateNotFound"
 		if(len(data.getElementsByTagName('t:Message')[0].getElementsByTagName('t:DateTimeReceived')) > 0):
 			response['date'] = data.getElementsByTagName('t:Message')[0].getElementsByTagName('t:DateTimeReceived')[0].firstChild.nodeValue
@@ -323,7 +323,7 @@ def runServer(serverIP, serverPort, poppedDB, poppedDB_Lock):
 		response['subject']		= '(None)'
 		if(data.getElementsByTagName('t:Message')[0].getElementsByTagName('t:Subject')[0].firstChild != None):
 			response['subject'] = str(data.getElementsByTagName('t:Message')[0].getElementsByTagName('t:Subject')[0].firstChild.nodeValue)
-		
+
 		response['attachments'] = []
 		for item in data.getElementsByTagName('t:Message')[0].getElementsByTagName('t:FileAttachment'):
 			name 	= item.getElementsByTagName('t:Name')[0].firstChild.nodeValue
@@ -380,16 +380,16 @@ def runServer(serverIP, serverPort, poppedDB, poppedDB_Lock):
 		else:
 			# Just send an email without any attachments
 			data = authRequests_POST(data = EWSOps.sendEmail_Secret(to_list, cc_list, bcc_list, subject, body), username = username)
-		
+
 
 		try:
 			data = xml.dom.minidom.parseString(data)
-		except Exception, e:
+		except Exception as e:
 			logging.info("ERROR: " + str(data) + "\n" + str(e))
 			return jsonify({}), 501
 
 		return jsonify({"result" : "success"}), 200
-		
+
 	# Downloads an attachment to the provided output directory
 	@app.route('/EWStoOWA/<username>/downloadAttachment', methods = ['POST'])
 	def downloadAttachment(username):
@@ -406,7 +406,7 @@ def runServer(serverIP, serverPort, poppedDB, poppedDB_Lock):
 		try:
 			data 	= authRequests_POST(data = EWSOps.downloadEmailAttachment(attachmentID), username = username)
 			data 	= xml.dom.minidom.parseString(data)
-		except Exception, e:
+		except Exception as e:
 			logging.info("downloadAttachment Error: " + str(data) + "\n" + str(e))
 			return jsonify({}), 501
 
@@ -440,7 +440,7 @@ def runServer(serverIP, serverPort, poppedDB, poppedDB_Lock):
 			outfolder = outfolder[:-1]
 
 		# Get a list of all ssubfolders of the folders & sub folders
-		treeMap 			= dict() 
+		treeMap 			= dict()
 		for known in EWSOps.DistinguishedFolders:
 			logging.info("(" + username + ") Expanding " + known + ".....")
 			parentSubs 		= listSubFoldersInDistinguished(known, username)
@@ -500,7 +500,7 @@ def runServer(serverIP, serverPort, poppedDB, poppedDB_Lock):
 
 			def divide_list_chunks(l, n):
 				# looping till length l
-				for i in range(0, len(l), n): 
+				for i in range(0, len(l), n):
 					yield l[i:i + n]
 
 			# Do this in 100 email batches for bandwidth reasons
@@ -535,7 +535,7 @@ def runServer(serverIP, serverPort, poppedDB, poppedDB_Lock):
 
 			logging.info("(" + username + ") Successfully downloaded " + str(len(attachmentIDs)) + " attachments!")
 			return jsonify({"data" : str(len(attachmentIDs)) + " attachments downloaded to " + outfolder}), 200
-		except Exception, e:
+		except Exception as e:
 			logging.error("downloadAllAttachments: " + str(e))
 			return jsonify({}), 500
 
@@ -550,7 +550,7 @@ def runServer(serverIP, serverPort, poppedDB, poppedDB_Lock):
 		try:
 			data = authRequests_POST(data = EWSOps.searchAddressBook(startsWith), username = username)
 			data = xml.dom.minidom.parseString(data)
-		except Exception, e:
+		except Exception as e:
 			logging.error("searchContacts: " + str(e))
 			return jsonify({}), 500
 
@@ -607,7 +607,7 @@ def runServer(serverIP, serverPort, poppedDB, poppedDB_Lock):
 					num['Number'] = number.firstChild.data
 				newContact['PhoneNumbers'].append(num)
 			contacts.append(newContact)
-		
+
 		# Send it
 		return jsonify(contacts), 200
 
@@ -632,7 +632,7 @@ def runServer(serverIP, serverPort, poppedDB, poppedDB_Lock):
 		outfile = open(XML_OUT, "w+")
 		logging.info("Exporting contacts to " + XML_OUT)
 
-		# Track what contacts have already been entered by their email addresses 
+		# Track what contacts have already been entered by their email addresses
 		# nested function for recursion
 		def recursive_contactSearch(seed, username):
 			exhausted = False
@@ -661,7 +661,7 @@ def runServer(serverIP, serverPort, poppedDB, poppedDB_Lock):
 						recursive_contactSearch.tmp_outfile.write(contact.toprettyxml() + "\n")
 				exhausted 		= (data.getElementsByTagName('m:ResolutionSet')[0].getAttribute('IncludesLastItemInRange') == "true")
 				if not exhausted:
-					recursive_contactSearch(searchString, username)		
+					recursive_contactSearch(searchString, username)
 		recursive_contactSearch.tmp_covered = []
 		recursive_contactSearch.tmp_outfile = outfile
 		recursive_contactSearch('', username)
@@ -683,7 +683,7 @@ def runServer(serverIP, serverPort, poppedDB, poppedDB_Lock):
 		data 		= authRequests_POST(data = rawXML, username = username)
 		bdata 		= base64.b64encode(data)
 		return jsonify({"data" : bdata}), 200
-	
+
 	# Add forward/redirect rules
 	@app.route('/EWStoOWA/<username>/addRedirectRule', methods = ['POST'])
 	def addRedirectRule(username):
@@ -698,7 +698,7 @@ def runServer(serverIP, serverPort, poppedDB, poppedDB_Lock):
 		try:
 			data = authRequests_POST(data = EWSOps.addRedirectRule(displayName, targetEmail), username = username)
 			data = xml.dom.minidom.parseString(data)
-		except Exception, e:
+		except Exception as e:
 			logging.error(e)
 			return jsonify({}), 500
 
@@ -713,4 +713,3 @@ def runServer(serverIP, serverPort, poppedDB, poppedDB_Lock):
 	# Del forward/redirect rules
 
 	app.run(debug=False, host = serverIP, port = serverPort, threaded = True)
-
