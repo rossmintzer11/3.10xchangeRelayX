@@ -92,7 +92,7 @@ def startServers(targetURL, hashOutputFile = None, serverIP = "127.0.0.1", serve
 	owa.start()
 
 	try:
-		while owa.isAlive():
+		while owa.is_alive():
 			pass
 	except KeyboardInterrupt as e:
 		logging.info("Shutting down...")
