@@ -15,7 +15,7 @@ class ExchangePlugin(HTTPAttack):
 		Thread.__init__(self)
 
 	def run(self):
-		if(self.username not in self.config.PoppedDB.keys()):
+		if(self.username not in list(self.config.PoppedDB.keys())):
 			self.config.PoppedDB_Lock.acquire()
 			self.config.PoppedDB[str(self.username)] = {"b64_request" : "", "b64_response" : "", "thread_id" : ""}
 			self.config.PoppedDB_Lock.release()
@@ -52,10 +52,10 @@ class ExchangePlugin(HTTPAttack):
 				pass
 			logging.info("Lost relay for " + self.username + " :( - " + str(e))
 			try:
-				if(self.username in self.config.PoppedDB.keys()):
+				if(self.username in list(self.config.PoppedDB.keys())):
 					self.config.PoppedDB_Lock.acquire()
 					try:
-						if(self.username in self.config.PoppedDB.keys()):
+						if(self.username in list(self.config.PoppedDB.keys())):
 							del(self.config.PoppedDB[self.username])
 						self.config.PoppedDB_Lock.release()
 					except:
