@@ -42,7 +42,7 @@ def authRequests_POST(username, data = None):
 				return uniStrip
 			# logging.info("Awaiting response from server...(" + str(poppedDB.keys()))
 	except Exception as e:
-		if(username in poppedDB.keys()):
+		if(username in list(poppedDB.keys())):
 			poppedDB_Lock.acquire()
 			del(poppedDB[username])
 			poppedDB_Lock.release()
@@ -141,7 +141,7 @@ def runServer(serverIP, serverPort, poppedDB, poppedDB_Lock):
 		while poppedDB_Lock.locked():
 			# wait for it to be unlocked
 			pass
-		for user in poppedDB.keys():
+		for user in list(poppedDB.keys()):
 			userList.append(user)
 
 		# If it's blank
@@ -350,12 +350,12 @@ def runServer(serverIP, serverPort, poppedDB, poppedDB_Lock):
 		cc_list 	= content['cc_recipients'].split(";")
 		bcc_list 	= content['bcc_recipients'].split(";")
 
-		if u'' in to_list:
-			to_list.remove(u'')
-		if u'' in cc_list:
-			cc_list.remove(u'')
-		if u'' in bcc_list:
-			bcc_list.remove(u'')
+		if '' in to_list:
+			to_list.remove('')
+		if '' in cc_list:
+			cc_list.remove('')
+		if '' in bcc_list:
+			bcc_list.remove('')
 
 		attachment 	= content['attachment']
 		subject 	= content['subject']
@@ -450,7 +450,7 @@ def runServer(serverIP, serverPort, poppedDB, poppedDB_Lock):
 
 		def recurse(dictionary):
 			subs = []
-			for key,value in dictionary.iteritems():
+			for key,value in dictionary.items():
 				for item in value:
 					subs.append({"FolderId" : str(item['FolderId']), "ChangeKey" : str(item['ChangeKey']), "Name" : str(item['Name'])})
 					for additional in item['SubFolders']:
