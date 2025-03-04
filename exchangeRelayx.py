@@ -88,6 +88,7 @@ def start_servers(target_url, hash_output_file=None, server_ip="127.0.0.1", serv
         config.setInterfaceIp("0.0.0.0")
         config.PoppedDB = popped_db  # Pass credential storage to relay servers
         config.PoppedDB_Lock = popped_db_lock  # Pass lock for thread safety
+        config.setSMB2Support(True)
         
         relay_server = server(config)
         relay_server.start()
